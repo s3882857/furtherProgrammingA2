@@ -155,49 +155,59 @@ public class TaskController {
 	@FXML
 	public void taskOnDragDropped(DragEvent event) {
 
-		String taskSource = event.getDragboard().getString();
-		Node targetNode = (Node) event.getTarget();
-
-		if (!this.util.isStringFieldEmpty(taskSource) && taskSource.contains("Source::")) {
-
-			String sourceID = taskSource.split("::")[1];
-
-			Task sourceTask = WorkSpaceManager.getInstance().findTask(sourceID);
-			Task targetTask = WorkSpaceManager.getInstance().findTask(targetNode.getId());
-
-			// Make sure we are dealing with a Task related Node.
-			if (sourceTask != null && targetTask != null) {
-
-				String[] sourceCoordinates = sourceID.split(":");
-				String[] targetCoordinates = targetNode.getId().split(":");
-
-				int sourceCol = Integer.parseInt(sourceCoordinates[1]);
-				int sourceRow = Integer.parseInt(sourceCoordinates[2]) + 1;
-
-				int destCol = Integer.parseInt(targetCoordinates[1]);
-				int destRow = Integer.parseInt(targetCoordinates[2]) + 1;
-
-				if (destCol != sourceCol || destRow != sourceRow) {
-
-					if (WorkSpaceManager.getInstance().swapTasks(sourceTask, targetTask)) {
-
-						TabPaneController.getInstance().switchNodes(sourceCol, sourceRow, destCol, destRow);
-
-					} else {
-
-						this.util.alertMessage("Task swap failed", "Duplicate task name found. Unable to switch tasks",
-								AlertType.INFORMATION, null);
-
-					}
-
-				}
-
-				event.consume();
-
+		try {
+			String taskSource = event.getDragboard().getString();
+			Node targetNode = (Node) event.getTarget();
+			String targetNodeID = "";
+			
+			if(targetNode.getId()!=null) {
+				targetNodeID = targetNode.getId(); 
 			}
-
+	
+			if (!this.util.isStringFieldEmpty(taskSource) && taskSource.contains("Source::") && targetNodeID.contains(":")) {
+	
+				String sourceID = taskSource.split("::")[1];
+	
+				Task sourceTask = WorkSpaceManager.getInstance().findTask(sourceID);
+				Task targetTask = WorkSpaceManager.getInstance().findTask(targetNode.getId());
+	
+				// Make sure we are dealing with a Task related Node.
+				if (sourceTask != null && targetTask != null) {
+	
+					
+					String[] sourceCoordinates = sourceID.split(":");
+					String[] targetCoordinates = targetNode.getId().split(":");
+	
+					int sourceCol = Integer.parseInt(sourceCoordinates[1]);
+					int sourceRow = Integer.parseInt(sourceCoordinates[2]) + 1;
+	
+					int destCol = Integer.parseInt(targetCoordinates[1]);
+					int destRow = Integer.parseInt(targetCoordinates[2]) + 1;
+	
+					if (destCol != sourceCol || destRow != sourceRow) {
+	
+						if (WorkSpaceManager.getInstance().swapTasks(sourceTask, targetTask)) {
+	
+							TabPaneController.getInstance().switchNodes(sourceCol, sourceRow, destCol, destRow);
+	
+						} else {
+	
+							this.util.alertMessage("Task swap failed", "Duplicate task name found. Unable to switch tasks",
+									AlertType.INFORMATION, null);
+	
+						}
+	
+					}
+	
+					event.consume();
+	
+				}
+	
+			}
 		}
-
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	@FXML
