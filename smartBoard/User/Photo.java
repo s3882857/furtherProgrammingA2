@@ -1,11 +1,14 @@
 package smartBoard.User;
 
-import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import javax.imageio.ImageIO;
+import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.image.Image;
+import utilities.FXUtilities;
+
 
 /*
  * Store the profile photo of the User.
@@ -13,42 +16,58 @@ import javax.imageio.ImageIO;
  */
 public class Photo {
 
-	private static Photo photo;
-	private String filePhotoName;
-	private BufferedImage profileImage;
-	private File file; 
+	//private static Photo photo;
+	
+	private Image image;
+	private File originalFile; 
 	private File storedFile;
-		
-	private Photo() {
-				
-		this.file = null;
-		this.profileImage = null;
-		this.filePhotoName = "";
-		this.storedFile = null;
-		
-	}
-			
+	private final String DIR = "Users"; 
+	private String fileName;
+	private FXUtilities util;
+	
 	/*
-	 *  Start writing profile photo image.
+	 * Instantiate a blank photo profile object.
 	 */
-	public boolean startWriteProfilePhoto() {
-
+	public Photo() {
+				
+		this.originalFile = null;
+		this.image = null;
+		this.util = new FXUtilities();		
+						
+	}
+	
+	/*
+	 * Instantiate the photo class with the image details and the user it relates too.
+	 */
+	public Photo(String fileImageName, String userName) throws IOException {
+		
+		this.originalFile = null;
+		this.image = null;
+		this.util = new FXUtilities();		
+		
+		setNewImage(fileImageName,userName);
+	
+	}
+		
+	/*
+	 * Write the image file to a standard file location to protect against the  
+	 * file being removed from its original location.
+	 */
+	public boolean writeImage(String userName) throws IOException {
+		
 		boolean writeOK = false;
 		
-		try {
-			if(this.profileImage!=null) {
-				
-				writeOK = WriteProfilePhoto();
-				
-			} else {
+		if(!this.util.isStringFieldEmpty(userName)) {
 			
-				this.profileImage = getBufferedImage();
-				writeOK = WriteProfilePhoto();
-				
-			}
-		}
-		catch(IOException ioe) {
-			// Just catch the Exception. Allow method to just return false. 
+			this.storedFile = null;
+			this.storedFile = new File(this.DIR + "//" + userName + "_" + this.fileName);
+			
+			BufferedImage bi = SwingFXUtils.fromFXImage(this.image,null);
+			
+			ImageIO.write(bi, this.storedFile.getName().split("\\.")[1], this.storedFile);
+			
+			writeOK = true;
+			
 		}
 		
 		return writeOK;
@@ -56,116 +75,128 @@ public class Photo {
 	}
 	
 	/*
-	 * Write and resize the image file 
-	 * Code source from https://mkyong.com/java/how-to-write-an-image-to-file-imageio/ 
-	 * (mkyong.com, 2020)
-	 * Also see readme.txt file for full references.
+	 * Read the image from storage location.
+	 * 
+	 * Should only be one file in existence. Need a generic way to find it
+	 * without having to store the original filename in the database.
+	 * Use the user name as a prefix to the original filename.
+	 * Search using the user name.
 	 */
-	private boolean WriteProfilePhoto() throws IOException {
+	public boolean readImage(String userName) throws IOException {
 		
-		this.storedFile = new File("./" + User.getInstance().getUserName() + "_" + this.filePhotoName);
+		String[] fileList;
+		String[] files = null;
 		
-		Image resizeImage = this.profileImage.getScaledInstance(350,320 , Image.SCALE_DEFAULT);
+		this.storedFile = new File(this.DIR + "\\" );
+		File fileFound = null;
 		
-		return ImageIO.write(convertToBufferedImage(resizeImage), "png", this.storedFile);
+		fileList = this.storedFile.list();
 		
-	}
-	
-	/*
-	 * Convert the Image back into a BufferedImage
-	 * Code source from https://mkyong.com/java/how-to-write-an-image-to-file-imageio/ 
-	 * (mkyong.com, 2020)
-	 * Also see readme.txt file for full references.
-	 */
-    private static BufferedImage convertToBufferedImage(Image img) {
-
-        if (img instanceof BufferedImage) {
-            return (BufferedImage) img;
-        }
-
-        // Create a buffered image with transparency
-        BufferedImage bi = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
-
-        Graphics2D graphics2D = bi.createGraphics();
-        
-        graphics2D.drawImage(img, 0, 0, null);
-        graphics2D.dispose();
-
-        return bi;
-        
-    }
-    
-	/*
-	 * Getters
-	 */
-    
-    /*
-	 *  Read photo. If the file exists and the Image has not been built 
-	 *  then build a new Image. There is only one version in existence.
-	 */
-	public BufferedImage getBufferedImage() throws IOException {
-		
-		if(this.profileImage==null) {
+		for(String file : fileList) {
 			
-			this.file = new File("./" + this.filePhotoName);
+			if(!this.util.isStringFieldEmpty(file)) {
+				
+				files = file.split("_");
+				
+				if(files[0].equals(userName)) {
 					
-			if(this.file.exists()) {
-				
-				this.profileImage = ImageIO.read(file);
-		
-			} else {
-				
-				throw new IOException("File " + this.filePhotoName + " does not exist.");
+					file = this.storedFile.getAbsolutePath() + "\\" + file;
+					fileFound = new File(file);
+					
+					break;
+				}
 				
 			}
 			
 		}
 		
-		return this.profileImage;
+		return setImage(fileFound);
 		
 	}
 	
 	/*
-	 * Get a static instance. Only need one instance of the profile image.
+	 * Remove any old images relating to this userName. Cleanup
 	 */
-	public synchronized static Photo getInstance() {
+	public void removeImage(String userName) {
 		
-		if(Photo.photo==null) {
+		String[] fileList;
+		
+		this.storedFile = new File(this.DIR + "\\" );
+		String[] files = null;
+		
+		fileList = this.storedFile.list();
+		
+		for (String fileName : fileList) {
 			
-			Photo.photo = new Photo();
+			files = fileName.split("_");
+	
+			if(files[0].equals(userName)) {
+				
+				fileName = this.storedFile.getAbsolutePath() + "\\" + fileName;
+							
+			}
 			
 		}
 		
-		return Photo.photo;
-		
 	}
+	
 	/*
-	 * Get file photo name profile photo.
+     *  Get the stored image.
 	 */
-	public String getFilePhotoName() {
-		return this.filePhotoName;
+	public Image getImage() throws IOException {
+		
+		if(this.image==null) {
+			readImage(User.getInstance().getUserName());
+		}
+		
+		return this.image;
+		
 	}
 	
 	/*
 	 * Setters
-	 * 
 	 */
 	
 	/*
-	 * Set file photo name. Profile picture. By resetting or setting the 
-	 * photo name this will force a rebuild of the BufferedImage. Check to 
-	 * ensure that it has changed first.
+	 * Set file photo name. Profile picture. 
 	 */
-	public void setFilePhotoName(String filePhotoName) {
+	public void setNewImage(String fileImageName, String userName) throws IOException {
 		
-		if(!filePhotoName.equals(this.filePhotoName)) {
+		removeImage(userName);
+		
+		this.originalFile = new File(fileImageName);
+		this.fileName = this.originalFile.getName();
 			
-			this.filePhotoName = filePhotoName;
 		
-			this.profileImage = null;
+		setImage(this.originalFile);
+		writeImage(userName);
+						
+	}
+	
+	/*
+	 * Set the image from a File object.
+	 */
+	private boolean setImage(File file) throws IOException {
+		
+		boolean imageOK = false;
+		
+		if(file!=null) {
+		
+			if(file.exists()) {
+				
+				FileInputStream fis = new FileInputStream(file);
+				
+				this.image = new Image(fis);
+				
+				fis.close();
+								
+				imageOK = true;
+				
+			}
 			
 		}
 		
+		return imageOK;
+		
 	}
-	
 }

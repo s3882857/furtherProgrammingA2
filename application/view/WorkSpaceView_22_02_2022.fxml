@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.effect.Glow?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox prefHeight="400.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.view.WorkSpaceController">
+  <children>
+    <MenuBar VBox.vgrow="NEVER">
+      <menus>
+        <Menu mnemonicParsing="false" text="Workspace">
+          <items>
+            <MenuItem fx:id="itmNewProject" mnemonicParsing="false" onAction="#addNewProject" text="New Project" />
+          </items>
+        </Menu>
+        <Menu mnemonicParsing="false" text="Project">
+          <items>
+            <MenuItem fx:id="itmNewBasket" mnemonicParsing="false" onAction="#addNewBasket" text="New Basket" />
+                  <MenuItem mnemonicParsing="false" text="Rename" />
+                  <MenuItem mnemonicParsing="false" text="Set as Default" />
+                  <MenuItem mnemonicParsing="false" text="Unset Default" />
+                  <MenuItem fx:id="mitDelete" mnemonicParsing="false" onAction="#deleteProject" text="Delete" />
+          </items>
+        </Menu>
+      </menus>
+    </MenuBar>
+      <VBox prefHeight="69.0" prefWidth="640.0">
+         <children>
+            <HBox fx:id="hBox" alignment="TOP_RIGHT" prefHeight="49.0" prefWidth="640.0" spacing="20.0">
+               <children>
+                  <Label fx:id="lblQuote" alignment="CENTER" contentDisplay="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" prefWidth="227.0" text="Inspirational quote" wrapText="true" />
+                  <Label fx:id="lblProfileName" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" prefWidth="120.0" />
+                  <ImageView fx:id="imgProfileImage" fitHeight="26.0" fitWidth="83.0" pickOnBounds="true" preserveRatio="true">
+                     <effect>
+                        <Glow level="1.0" />
+                     </effect>
+                  </ImageView>
+                  <Button fx:id="btnProfile" mnemonicParsing="false" onAction="#loadProfileView" text="Profile" />
+                  <Button fx:id="btnLogout" mnemonicParsing="false" onAction="#exitWorkSpace" text="Log out" />
+               </children>
+               <padding>
+                  <Insets right="10.0" top="10.0" />
+               </padding>
+            </HBox>
+            <HBox alignment="CENTER" prefHeight="20.0" prefWidth="640.0">
+               <children>
+                  <Label fx:id="lblMessage" prefWidth="620.0" />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+      <ScrollPane fx:id="scrollPane" hbarPolicy="ALWAYS" prefHeight="200.0" prefWidth="200.0" vbarPolicy="ALWAYS" VBox.vgrow="ALWAYS">
+        <content>
+          <AnchorPane fx:id="anchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="294.0" prefWidth="625.0">
+               <children>
+                  <TabPane fx:id="tabPane" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="ALL_TABS" />
+               </children>
+            </AnchorPane>
+        </content>
+      </ScrollPane>
+  </children>
+</VBox>

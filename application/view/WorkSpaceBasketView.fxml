@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.SplitMenuButton?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="35.0" prefWidth="320.0" style="-fx-background-color: #cdcfd1; -fx-border-color: darkgrey;" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.view.BasketController">
+   <children>
+      <SplitMenuButton fx:id="smbAddTask" layoutX="186.0" layoutY="5.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onMouseClicked="#onMouseClickDropDown" onMouseEntered="#onMouseClickDropDown" prefHeight="25.0" prefWidth="120.0" text="Add Task">
+        <items>
+          <MenuItem fx:id="itmAddTask" mnemonicParsing="false" onAction="#loadTaskView" text="Add Task" />
+          <MenuItem fx:id="itmDeleteBasket" mnemonicParsing="false" onAction="#deleteBasket" text="Delete Basket" />
+            <MenuItem fx:id="itmRenameBasket" mnemonicParsing="false" onAction="#renameBasket" text="Rename Basket" />
+            <SeparatorMenuItem mnemonicParsing="false" />
+            <MenuItem fx:id="itmMoveLeft" mnemonicParsing="false" onAction="#moveLeft" text="Move To Left" />
+            <MenuItem fx:id="itmMoveRight" disable="true" mnemonicParsing="false" onAction="#moveRight" text="Move To Right" />
+        </items>
+      </SplitMenuButton>
+      <Label fx:id="lblBasketName" layoutX="21.0" layoutY="5.0" prefHeight="25.0" prefWidth="150.0" />
+   </children>
+   <padding>
+      <Insets left="20.0" right="30.0" />
+   </padding>
+</AnchorPane>

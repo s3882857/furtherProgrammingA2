@@ -1,32 +1,50 @@
 package smartBoard.WorkSpace;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 
-public class CheckList {
+public class CheckList extends WorkSpace {
 
-	private String name;
+	
 	private boolean complete;
 	private LocalDate completeDate;
 	private LocalDate scheduleDate;
+	private String name;
 	
 	public CheckList(String name) {
-		
-		this.name = name;
+		super();
 		this.complete = false;
+		this.name = name;
+	}
+	
+	public CheckList(ResultSet rs) {
+		super();
+		// Add more things here.
+	}
+	
+	@Override
+	public void open() throws SQLException {
+		
+	    super.openSBConnection();
+		
+	}
+
+	@Override
+	public void close() throws SQLException {
+		
+		super.closeSBConnection();
 		
 	}
 	
-	
+	@Override
+	public void writeDB() throws SQLException {
+					
+	}
 	/*
 	 * Getters
 	 */
 	
-	/*
-	 * Get the check list's item name.
-	 */
-	public String getName() {
-		return this.name;
-	}
 	
 	/*
 	 * Get complete status.
@@ -61,6 +79,9 @@ public class CheckList {
 		return scheduleDate;
 	}
 	
+	public String getName() {
+		return this.name;
+	}
 	/*
 	 * Setters
 	 */
@@ -84,5 +105,7 @@ public class CheckList {
 		this.scheduleDate = today.plusDays(addOnDays);
 		
 	}
+
+	
 
 }

@@ -1,36 +1,36 @@
 package smartBoard.WorkSpace;
 
-import utilities.ConsoleUtilities;
+import utilities.FXUtilities;
 
 /*
  * Factory for creating a new instance of a WorkSpace item or task.
  */
 public class WorkSpaceInitiator {
 
-	private ConsoleUtilities consoleUtils;
+	private FXUtilities utils;
 	
 	public WorkSpaceInitiator() {
 		
-		this.consoleUtils = new ConsoleUtilities();
+		this.utils = new FXUtilities();
 		
 	}
 	
-	public WorkSpaceHub createWorkSpaceItem(String itemType, String name) throws IllegalArgumentException{
+	public WorkSpace createWorkSpaceItem(String itemType, String name) throws IllegalArgumentException{
 		
-		WorkSpaceHub hub = null;
+		WorkSpace hub = null;
 		
-		if(!this.consoleUtils.isStringFieldEmpty(name)) {
+		if(!this.utils.isStringFieldEmpty(name)) {
 		
 			switch(itemType) {
 		
 			case "Project":
-				hub = new Project(name);
+		//		hub = new Project(name);
 				break;
 			case "Basket":
-				hub = new Basket(name);
+			//	hub = new Basket(name);
 				break;
 			case "Task":
-				hub = new Task(name);
+				//hub = new Task(name);
 				break;
 			default:
 				throw new IllegalArgumentException();

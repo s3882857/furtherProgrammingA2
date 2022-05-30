@@ -1,244 +1,344 @@
 package smartBoard.WorkSpace;
 
-import java.io.Serializable;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+//import java.sql.Date;
+//import java.sql.ResultSet;
+//import java.sql.SQLException;
+//import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.LinkedHashSet;
+import java.util.regex.PatternSyntaxException;
 
-import smartBoard.User.SmartBoardLoginException;
+import smartBoard.Connection.SBConnectionManager;
+import smartBoard.Connection.SQLScriptor;
 import smartBoard.User.User;
-import utilities.ConsoleUtilities;
+import utilities.FXUtilities;
 
 /*
  * WorkSpace for storing all items and tasks relating to a User.
- * Acts as a Facade to simplify access to the inner workings of 
- * all data structures.
+ * Super base class for all WorkSpace items. Project, Basket, Task, etc.
  */
-@SuppressWarnings("serial")
-public class WorkSpace implements Serializable {
+public abstract class WorkSpace {
 
-	// Serial Id used for class Serialization
-	//private static final long serialVersionUID = 1L;
+	private String referenceNo;
+	// User that created the item.
+	private String userName;
 	
-	// The user name of the item. Who it belongs to. Who created this.
-	//private String userName;
+	// Name of the item.
+	private String name;
 	
-	private WorkSpaceInitiator workSpaceInit; 
-	private Inspiration inspiration;
-	//private ConsoleUtilities consoleUtils;
+	// Create date and time. 
+	private LocalDate createDate;
+	private LocalTime createTime;
 	
-	private LinkedHashSet<Project> projects;
+	// Item deleted status. No records are deleted instead a status is set to prevent
+	// it being displayed to the user if this is true.
+	private boolean deleted;
 	
+	// Parent name 
+	private String parentName;
+	
+	// Item sequence number. Used to write each workspace item back to the database.
+	// whilst preserving the items order. Writes a new referenceNo each time.
+	private static int itemNumber;
+	
+	// Data has been written.
+	private boolean written;
+	
+	// Database connection.
+	private SBConnectionManager connectionSB;
+	
+	// Script generator.
+	private SQLScriptor script;
+	
+	// Utilities
+	public FXUtilities util;
+	
+	final static String KEYNAME = "NAME";
+	final static String KEYNAME2 = "USERNAME";
+	final static String KEYNAME3 = "PARENTNAME";
 	/*
-	 * Start with a user name. Read in from file or DB.
+	 * Create a new workspace item. 
 	 */
 	public WorkSpace() {
 		
-		this.workSpaceInit = new WorkSpaceInitiator();
-		this.inspiration = new Inspiration();
-		//this.consoleUtils = new ConsoleUtilities();
+		this.userName = User.getInstance().getUserName();
 		
-		this.projects = new LinkedHashSet<Project>();
+		this.name = "";
+		this.parentName = "";
+		this.createDate  = LocalDate.now();
+		this.createTime  = LocalTime.now();
+		this.deleted = false;
 		
+		this.connectionSB = new SBConnectionManager();
+		this.script = new SQLScriptor();
+		this.util = new FXUtilities();
+				
+			
+		this.written = false;
 		
 	}
-	
 		
-	/* The following 2 methods perform the same functions. 
-	 * 
-	 * Create a new Item to be added to the WorkSpace. 
-	 * 
-	 * (createItem creates a Project or Basket) Only requires 2 parameters.
-	 * (createTask creates a Task) Requires 2 parameters. 
-	 *                                                             
-	 * The item is added to the current project the User is logged into. If it is a 
-	 * Project item then add it to the WorkSpace itself.
-	 * The Project the item belongs to is determined by the User login. User object retains
-	 * the logged into project. User is static. 
-	 */
-	/*public boolean createItem(String workSpaceItemType, String name) throws SmartBoardLoginException {
-		
-		return createWorkSpaceObj(workSpaceItemType, name, "");
-			
-	}
-	
-	public boolean createTask( String name, String basketName) throws SmartBoardLoginException, IllegalArgumentException  {
-		
-		return createWorkSpaceObj("Task", name, basketName);
-		
-	}
-	
-	private boolean createWorkSpaceObj(String workSpaceItemType, String name, String basketName) throws SmartBoardLoginException, IllegalArgumentException {
-		
-		String projectName = User.getInstance().getProjectLogin();
-		
-		WorkSpaceHub workSpaceItem = this.workSpaceInit.createWorkSpaceItem(workSpaceItemType, name);
-		
-		if(workSpaceItem instanceof Project && workSpaceItemType.equalsIgnoreCase("Project")) {
-			
-			this.add((Project)workSpaceItem);
-						
-		} else if(workSpaceItem instanceof Basket  && workSpaceItemType.equalsIgnoreCase("Basket")) {
-		
-			findProject(projectName).add(workSpaceItem);
-			
-		} else if(workSpaceItem instanceof Task  && workSpaceItemType.equalsIgnoreCase("Task") && !this.consoleUtils.isStringFieldEmpty(basketName)) {
-	
-			findProject(projectName).findBasket(basketName).add(workSpaceItem);
-			
-		} else {
-			
-			throw new IllegalArgumentException();
-			
-		}
-		
-		return true;
-		
-	}*/
-	
-	/*  
-	 * Create a new Item to be added to the WorkSpace. 
-	 *                                                             
-	 * The item is added to the current project, and/or basket, and/or task the User is logged into. 
-	 * The current project, basket, and task is maintained within the User static facade class.
-	 *  
-	 */
-	public boolean createItem(String workSpaceItemType, String name) throws SmartBoardLoginException {
-		
-		return createWorkSpaceObj(workSpaceItemType, name);
-			
-	}
-	
-/*	public boolean createTask( String name, String basketName) throws SmartBoardLoginException, IllegalArgumentException  {
-		
-		return createWorkSpaceObj("Task", name, basketName);
-		
-	}*/
-	
-	private boolean createWorkSpaceObj(String workSpaceItemType, String name) throws SmartBoardLoginException, IllegalArgumentException {
-		
-		String projectName = User.getInstance().getProjectLogin();
-		String basketName = User.getInstance().getBasketLogin();
-		
-		WorkSpaceHub workSpaceItem = this.workSpaceInit.createWorkSpaceItem(workSpaceItemType, name);
-		
-		if(workSpaceItem instanceof Project && workSpaceItemType.equalsIgnoreCase("Project")) {
-			
-			this.add((Project)workSpaceItem);
-			User.getInstance().setProjectLogin(name);
-						
-		} else if(workSpaceItem instanceof Basket  && workSpaceItemType.equalsIgnoreCase("Basket")) {
-		
-			findProject(projectName).add(workSpaceItem);
-			User.getInstance().setCurrentBasket(name);
-			
-		} else if(workSpaceItem instanceof Task  && workSpaceItemType.equalsIgnoreCase("Task") ) {
-	
-			findProject(projectName).findBasket(basketName).add(workSpaceItem);
-			User.getInstance().setCurrentTask(name);
-			
-		} else {
-			
-			throw new IllegalArgumentException();
-			
-		}
-		
-		return true;
-		
-	}
+	// Make sure for each record every connection is opened and closed.
+	public abstract void open() throws SQLException;
 	
 	/*
-	 * Add Project to the WorkSpace.
+	 * Header read for all Tables.
 	 */
-	public void add( WorkSpaceHub workSpace) throws IllegalArgumentException {
+	public void readDB(ResultSet rs) throws SQLException {
 		
-		if(workSpace instanceof Project) {
-			
-			this.projects.add((Project) workSpace );
-			
-		} else {
-			
-			throw new IllegalArgumentException();
-			
-		}
+		setName(rs.getString(WSQueryColumns.WS_NAME));
+		setCreateDate(rs.getString(WSQueryColumns.WS_CREATE_DATE));
+		setCreateTime(rs.getString(WSQueryColumns.WS_CREATE_tIME));
+		setUserName(rs.getString(WSQueryColumns.WS_USERNAME));
+		setDeleted(Boolean.parseBoolean(rs.getString(WSQueryColumns.WS_DELETED)));
+		setReferenceNo(rs.getString(WSQueryColumns.WS_REFERENCE_NO));
 		
 	}
-	
-	/*
-	 * Find Project. Exact match.
-	 */
-	public Project findProject(String searchKey) {
 		
-		Project projObj = null;
-		
-		for(Project project : this.projects) {
-			
-			if(searchKey.equalsIgnoreCase(project.getName())) {
-				projObj = project;
-				break;
-			}
-		}
-		
-		return projObj;
-		
-	}
+	public abstract void writeDB() throws SQLException;
 	
-	/*
-	 * Getters
-	 */
-	
-	/*
-	 * return list of projects belonging to this workspace.
-	 */
-	public LinkedHashSet<Project> getProjects(){
-		return this.projects;
-	}
-	
-	/*
-	 * get UserName.
-	 */
-	/*public String getUserName() {
-		return this.userName;
-	}*/
+	public String[] getColumnValues() {
 
-	/*
-	 * Get the name of this workspace. UserName is used for this.
-	 */
-	/*@Override
-	public String getName() {
-		return getUserName();
-	}*/
+		String[] columnValues = new String[11];
+
+		int i = 0;
+
+		columnValues[i++] = getName();          
+		columnValues[i++] = getCreateDate();
+		columnValues[i++] = getCreateTime();
+		columnValues[i++] = getUserName();
+		columnValues[i++] = String.valueOf(getItemNumber());
+		columnValues[i++] = String.valueOf(getDeleted());
+		columnValues[i++] = "<skip>";
+		columnValues[i++] = "<skip>";
+		columnValues[i++] = "<skip>";
+		columnValues[i++] = "<skip>";
+		columnValues[i++] = "<skip>";
+
+		return columnValues;
+		
+	}
+	
+	// Make sure for each record every connection is opened and closed.
+	public abstract void close() throws SQLException;
 	
 	/*
-	 * Get an inspirational quote to display the user. This occurs with each login to 
-	 * this WorkSpace.
+	 * Get the referenceNo
 	 */
-	public String getInspirationalQuote() {
+	public String getReferenceNo() {
 		
-		return this.inspiration.getQuote();
+		// If there is no referenceNo allocated it means this is a new WorkSpace item.
+		if(this.util.isStringFieldEmpty(this.referenceNo)) {
+			this.referenceNo = String.valueOf(this.getItemNumber());
+		}
+		
+		return this.referenceNo;
+		
+	}
+	
+	/*
+	 * Get the user name.
+	 */
+	public String getUserName() {
+		
+		return this.userName;
+		
+	}
+	
+	public String getName() {
+		
+		return this.name;
+		
+	}
+	
+	public String getParentName() {
+		
+		return this.parentName;
 		
 	}
 	/*
-	 * Setters.
+	 * Get date record created. 99/99/9999
 	 */
+	public String getCreateDate() {
+		
+		return this.createDate.toString();
+		
+	}
 	
 	/*
-	 * Set user Name
+	 * Get time record created. ss-mm-hh
 	 */
-	/*public void setUserName(String userName) {
+	public String getCreateTime() {
+	
+		return this.createTime.toString();
+		
+	}
+	
+	/*
+	 * Get deleted status.
+	 */
+	public boolean getDeleted() {
+		
+		return this.deleted;
+		
+	}
+	
+	/*
+	 * Get written flag.
+	 */
+	public boolean isRecordWritten() {
+		return this.written;
+	}
+	
+	/*
+	 * Get item number. Static value. Keeps all items unique and remembers there display order.
+	 */
+	public int getItemNumber() {
+		
+		if(WorkSpace.itemNumber<=0) {
+			WorkSpace.itemNumber = 1;
+		}
+		
+		return incrementItemNumber();
+		
+	}
+	
+	private int incrementItemNumber() {
+		return WorkSpace.itemNumber++;
+	}
+	
+	/*
+	 * Standard database open and start for all workspace items.
+	 */
+	public void openSBConnection() throws SQLException {
+		
+		this.connectionSB.createSBConnection();
+		this.connectionSB.createSBStatement();
+		
+	}
+	
+	/*
+	 * Standard database close for all workspace items.
+	 */
+	public void closeSBConnection() throws SQLException {
+		
+		this.connectionSB.close();
+		
+	}
+	
+	/*
+	 * Clean database after amending Project Name or task name.
+	 */
+	public void updateChildren(String newParentName) throws SQLException {
+		
+	
+		
+	}
+	
+	
+	/*
+	 * Get database connection.
+	 */
+	public SBConnectionManager getConnection() {
+		
+		return this.connectionSB;
+		
+	}
+	
+	/*
+	 * Get a script maker/generator for all workspace items
+	 */
+	public SQLScriptor getSQLScriptor() {
+		
+		return this.script;
+		
+	}
+	
+	
+	public void recordWritten() {
+		this.written = true;
+	}
+	
+	/*
+	 * Set deleted status.
+	 */
+	public void setDeleted(boolean yesNo) {
+		
+		this.deleted = yesNo;
+		
+	}
+	
+	public void setCreateDate(String createDate) {
+		
+		this.createDate = this.util.convertDate(createDate);
+			
+	}
+	
+	public void setCreateTime(String createTime) {
+		
+		LocalTime newTime = null;
+		
+		try {
+		
+			
+			String[] formattedTime = createTime.split(":");
+			
+			int hour = Integer.parseInt(formattedTime[0]);
+			
+			int minute = Integer.parseInt(formattedTime[1]);
+					
+			String[] formattedSecond = formattedTime[2].split("\\.");
+						
+			int second = Integer.parseInt(formattedSecond[0]);
+						
+			newTime = LocalTime.of(hour, minute, second);
+								
+		}
+		catch(NumberFormatException nfe) {
+			
+			newTime = LocalTime.now();
+			
+		}
+		catch(PatternSyntaxException e) {
+			
+			newTime = LocalTime.now();
+			
+		}
+		
+		this.createTime = newTime;
+		
+	}
+	
+	public void setUserName(String userName) {
+		
 		this.userName = userName;
-	}*/
+		
+	}
 	
-	/*
-	 * Set Task name description.
-	 */
-	public void setDescription( String descripiton ) throws SmartBoardLoginException {
+	public void setReferenceNo(String referenceNo) {
 		
-		String projectName = User.getInstance().getProjectLogin();
-		String basketName = User.getInstance().getBasketLogin();
-		String taskName = User.getInstance().getTaskLogin();
+		this.referenceNo = referenceNo;
+		WorkSpace.itemNumber = Integer.parseInt(this.referenceNo);
 		
-		findProject(projectName).findBasket(basketName).findTask(taskName).setDescription(descripiton);
+	}
+	
+	public void setName(String name) {
+		
+		this.name = name;
+		
+	}
+	
+	public void setParentName(String parentName) {
+		
+		this.parentName = parentName;
+		
+	}
+	
+	public void setItemNumberZero() {
+		
+		WorkSpace.itemNumber = 0;
 		
 	}
 	

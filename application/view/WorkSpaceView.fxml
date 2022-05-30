@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.effect.Glow?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane fx:id="borderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="646.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.view.WorkSpaceController">
+   <top>
+      <VBox BorderPane.alignment="CENTER">
+         <children>
+            <MenuBar>
+              <menus>
+                  <Menu mnemonicParsing="false" text="Workspace">
+                     <items>
+                        <MenuItem fx:id="itmNewProject" mnemonicParsing="false" onAction="#addNewProject" text="New Project" />
+                     </items>
+                  </Menu>
+                  <Menu fx:id="mnuProject" mnemonicParsing="false" onShown="#refreshProjectMenu" text="Project">
+                     <items>
+                        <MenuItem fx:id="itmNewBasket" mnemonicParsing="false" onAction="#addNewBasket" text="New Basket" />
+                        <MenuItem fx:id="itmRenameProject" mnemonicParsing="false" onAction="#renameProject" text="Rename Project" />
+                        <MenuItem fx:id="mitSetDefault" disable="true" mnemonicParsing="false" onAction="#setTabDefault" text="Set as Default" />
+                        <MenuItem fx:id="mitUnsetDefault" mnemonicParsing="false" onAction="#unsetTabDefault" text="Unset Default" />
+                        <MenuItem fx:id="mitDelete" mnemonicParsing="false" onAction="#deleteProject" text="Delete" />
+                     </items>
+                  </Menu>
+              </menus>
+            </MenuBar>
+            <VBox prefHeight="69.0" prefWidth="640.0">
+               <children>
+                  <HBox alignment="CENTER" prefHeight="49.0" prefWidth="640.0" spacing="10.0">
+                     <children>
+                        <Label fx:id="lblQuote" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="39.0" prefWidth="400.0" text="Inspirational quote" wrapText="true">
+                           <font>
+                              <Font name="System Italic" size="12.0" />
+                           </font></Label>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label fx:id="lblProfileName" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" prefWidth="120.0" />
+                        <ImageView fx:id="imgProfileImage" fitHeight="26.0" fitWidth="83.0" pickOnBounds="true" preserveRatio="true">
+                           <effect>
+                              <Glow level="1.0" />
+                           </effect>
+                           <image>
+                              <Image url="@../../../../../../../Further%20Programming/Assignment%202/userImage.png" />
+                           </image>
+                        </ImageView>
+                        <Button fx:id="btnProfile" mnemonicParsing="false" onAction="#loadProfileView" text="Profile" />
+                        <Button fx:id="btnLogout" mnemonicParsing="false" onAction="#exitWorkSpace" text="Log out" />
+                     </children>
+                     <VBox.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </VBox.margin>
+                     <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </padding>
+                  </HBox>
+                  <HBox alignment="CENTER" prefHeight="20.0" prefWidth="640.0">
+                     <children>
+                        <Label fx:id="lblMessage" prefWidth="620.0" />
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+         </children>
+      </VBox>
+   </top>
+   <center>
+      <TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE" />
+   </center>
+</BorderPane>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane fx:id="taskPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onDragDetected="#taskOnDragDetected" onDragDropped="#taskOnDragDropped" onDragOver="#taskOnDragOver" prefHeight="100.0" prefWidth="320.0" style="-fx-background-color: white; -fx-border-color: grey;" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.view.TaskController">
+   <children>
+      <Label fx:id="lblTaskName" alignment="CENTER" layoutY="39.0" prefHeight="25.0" prefWidth="200.0" text="Task Name">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font></Label>
+      <Label fx:id="lblEdit" layoutX="274.0" layoutY="13.0" onMouseClicked="#loadTaskView" prefHeight="17.0" prefWidth="32.0" text="Edit" textFill="#3f36f2" />
+      <Label fx:id="lblDelete" layoutX="216.0" layoutY="13.0" onMouseClicked="#deleteTask" prefHeight="17.0" prefWidth="52.0" text="Delete" textFill="#3f36f2" />
+      <Label fx:id="lblDue" layoutX="5.0" layoutY="72.0" prefHeight="25.0" prefWidth="40.0" text="Due :" visible="false">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </Label>
+      <Label fx:id="lblDueDateIndicator" alignment="CENTER" contentDisplay="CENTER" layoutX="50.0" layoutY="72.0" prefHeight="25.0" prefWidth="200.0" style="-fx-background-color: #208f15;" visible="false" />
+   </children>
+</AnchorPane>
